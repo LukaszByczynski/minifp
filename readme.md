@@ -5,14 +5,14 @@ Simple toy project created to fully understand all hidden mechanisms behind all 
 
 Roadmap:
 
-- [ ] Stack safe IO monad with following capitablities:
-  - [ ] pure
+- [x] Stack safe IO monad with following capitablities:
+  - [x] pure
   - [ ] effect
-  - [ ] map
+  - [x] map
   - [ ] mapError
   - [ ] raise
   - [ ] attempt
-  - [ ] flatMap
+  - [x] flatMap
   - [ ] ifM
   - [ ] foldM
 - [ ] Core FP typeclasses like:
