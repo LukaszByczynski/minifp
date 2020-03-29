@@ -6,14 +6,15 @@ Simple toy project created to fully understand all hidden mechanisms behind all 
 Roadmap:
 
 - [x] Stack safe IO monad with following capitablities:
+  - [x] bi-functor
   - [x] pure
-  - [ ] effect
+  - [x] effect
   - [x] map
-  - [ ] mapError
-  - [ ] raise
-  - [ ] attempt
+  - [x] mapError
+  - [x] raise
+  - [x] attempt
   - [x] flatMap
-  - [ ] ifM
+  - [x] ifM
   - [ ] foldM
 - [ ] Core FP typeclasses like:
   - [ ] Monoid
