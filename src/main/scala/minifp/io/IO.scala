@@ -14,7 +14,7 @@ trait IO[+E, +A] { self =>
   }
 
   def map[B](f: A => B): IO[E, B] = {
-    flatMap(a => PureOp(f(a)))
+    MapOp(self, f)
   }
 
   def mapError[E1](f: E => E1): IO[E1, A] = {

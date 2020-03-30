@@ -98,6 +98,11 @@ class IOTests extends AnyFunSuite {
   }
 
   test("unit") {
+    val program = IO.unit
+
+    assertResult(())(Runtime.unsafeRun(program))
+  }
+
   test(">>=") {
     val program = IO.pure(1) >>= IO.unit
 

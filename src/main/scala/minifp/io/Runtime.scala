@@ -1,5 +1,7 @@
 package minifp.io
 
+import scala.annotation.switch
+
 object Runtime {
   import internals._
 
@@ -17,13 +19,14 @@ object Runtime {
     var error: Any           = null
 
     while (opcode != null) {
-      opcode.ioTag match {
+      (opcode.ioTag: @switch) match {
         case IOTag.Resume =>
           opcode = opcode.asInstanceOf[ResumeOp[Any, Any]].effect()
 
         case IOTag.Pure =>
-          if (error == null)
+          if (error == null) {
             result = opcode.asInstanceOf[PureOp[Any]].value
+          }
           opcode = cont
 
         case IOTag.Raise =>
@@ -35,41 +38,51 @@ object Runtime {
             try {
               result = opcode.asInstanceOf[EffectOp[Any, Any]].effect()
             } catch {
-              case err: RuntimeException => error = err
+              case err: RuntimeException =>
+                error = err
             }
           }
           opcode = cont
 
+        case IOTag.Map =>
+          val _cont                     = cont
+          val map: MapOp[Any, Any, Any] = opcode.asInstanceOf[MapOp[Any, Any, Any]]
+
+          opcode = map.io
+          cont = ResumeOp(() => {
+            if (error == null)
+              result = map.f(result)
+            _cont
+          })
+
         case IOTag.FlatMap =>
-          val io: FlatMapOp[Any, Any, Any, Any] = opcode.asInstanceOf[FlatMapOp[Any, Any, Any, Any]]
-          opcode = io.io
-          if (cont == null) {
-            cont = ResumeOp(() => {
-              cont = null
-              if (error == null)
-                io.f(result)
-              else null
-            })
-          } else {
-            val _cont = cont
-            cont = ResumeOp(() => {
+          val _cont                               = cont
+          val fmap: FlatMapOp[Any, Any, Any, Any] = opcode.asInstanceOf[FlatMapOp[Any, Any, Any, Any]]
+
+          opcode = fmap.io
+          cont = ResumeOp(() => {
+            if (error == null) {
               cont = _cont
-              if (error == null)
-                io.f(result)
-              else null
-            })
-          }
+              fmap.f(result)
+            } else {
+              cont = null
+              _cont
+            }
+          })
 
         case IOTag.FlatMapError =>
-          val io: FlatMapErrorOp[Any, Any, Any] = opcode.asInstanceOf[FlatMapErrorOp[Any, Any, Any]]
-          opcode = io.io
-          val _cont = cont
+          val _cont                               = cont
+          val fmap: FlatMapErrorOp[Any, Any, Any] = opcode.asInstanceOf[FlatMapErrorOp[Any, Any, Any]]
+
+          opcode = fmap.io
           cont = ResumeOp(() => {
             if (error != null) {
               cont = _cont
-              io.f(error)
-            } else
+              fmap.f(error)
+            } else {
+              cont = null
               _cont
+            }
           })
 
         case IOTag.Attempt =>
@@ -80,6 +93,8 @@ object Runtime {
             error = null
             _cont
           })
+
+        case _ => ???
       }
     }
 

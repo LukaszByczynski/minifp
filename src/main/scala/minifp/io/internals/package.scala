@@ -2,16 +2,17 @@ package minifp.io
 
 package internals {
 
-  private[io] object IOTag extends Enumeration {
-    type Type = Value
+  private[io] object IOTag {
+    type Type = Int
 
-    val Resume       = Value
-    val Pure         = Value
-    val Raise        = Value
-    val Effect       = Value
-    val FlatMap      = Value
-    val FlatMapError = Value
-    val Attempt      = Value
+    final val Resume       = 0
+    final val Pure         = 1
+    final val Raise        = 2
+    final val Effect       = 3
+    final val Map          = 4
+    final val FlatMap      = 5
+    final val FlatMapError = 6
+    final val Attempt      = 7
   }
 
   private[io] abstract class Opcode[E, A](
@@ -26,6 +27,7 @@ package internals {
 
   private[io] final case class EffectOp[E, A](effect: () => A) extends Opcode[E, A](IOTag.Effect)
 
+  private[io] final case class MapOp[E, A, B](io: IO[E, A], f: A => B) extends Opcode[E, B](IOTag.Map)
   private[io] final case class FlatMapOp[E, A, E1, B](io: IO[E, A], f: A => IO[E1, B])
       extends Opcode[E, B](IOTag.FlatMap)
 
