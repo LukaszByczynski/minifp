@@ -25,8 +25,35 @@ trait IO[+E, +A] { self =>
     AttemptOp(self)
   }
 
-  def >>=[E1 >: E, B](f: => IO[E1, B]): IO[E, B] = {
-    flatMap(_ => f)
+  def productL[E1 >: E, B](i: => IO[E1, B]): IO[E, A] = {
+    flatMap(result => i.map(_ => result))
+  }
+
+  def productR[E1 >: E, B](i: => IO[E1, B]): IO[E, B] = {
+    flatMap(_ => i)
+  }
+
+  def product[E1 >: E, B](i: => IO[E1, B]): IO[E, (A, B)] = {
+    for {
+      a <- self
+      b <- i
+    } yield (a, b)
+  }
+
+  def *<[E1 >: E, B](i: => IO[E1, B]): IO[E, A] = {
+    productL(i)
+  }
+
+  def *>[E1 >: E, B](i: => IO[E1, B]): IO[E, B] = {
+    productR(i)
+  }
+
+  def <*>[E1 >: E, B](i: => IO[E1, B]): IO[E, (A, B)] = {
+    product(i)
+  }
+
+  def >>=[E1 >: E, B](i: => IO[E1, B]): IO[E, B] = {
+    productR(i)
   }
 
 }

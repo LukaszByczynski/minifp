@@ -1,4 +1,5 @@
 # minifp - off time toy project
+
 ---
 
 Simple toy project created to fully understand all hidden mechanisms behind all modern fp libraries like scalaz, cats, zio, ...
@@ -16,8 +17,7 @@ Roadmap:
   - [x] flatMap
   - [x] ifM
   - [x] unit
-  - [ ] *>, *<, <*>
-  - [ ] foldM
+  - [x] _>, _<, <\*>
 - [ ] Core FP typeclasses like:
   - [ ] Monoid
   - [ ] Functor
