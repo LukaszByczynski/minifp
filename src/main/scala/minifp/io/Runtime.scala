@@ -1,10 +1,7 @@
 package minifp.io
 
-import scala.annotation.tailrec
-import scala.collection.View.FlatMap
-
 object Runtime {
-  import IO._
+  import internals._
 
   @inline
   def unsafeRun[E, A](program: IO[E, A]): A = unsafeRunSync(program) match {
@@ -20,20 +17,20 @@ object Runtime {
     var error: Any           = null
 
     while (opcode != null) {
-      opcode.tag match {
-        case Tag.Resume =>
+      opcode.ioTag match {
+        case IOTag.Resume =>
           opcode = opcode.asInstanceOf[ResumeOp[Any, Any]].effect()
 
-        case Tag.Pure =>
+        case IOTag.Pure =>
           if (error == null)
             result = opcode.asInstanceOf[PureOp[Any]].value
           opcode = cont
 
-        case Tag.Raise =>
+        case IOTag.Raise =>
           error = opcode.asInstanceOf[RaiseOp[Any]].error
           opcode = cont
 
-        case Tag.Effect =>
+        case IOTag.Effect =>
           if (error == null) {
             try {
               result = opcode.asInstanceOf[EffectOp[Any, Any]].effect()
@@ -43,7 +40,7 @@ object Runtime {
           }
           opcode = cont
 
-        case Tag.FlatMap =>
+        case IOTag.FlatMap =>
           val io: FlatMapOp[Any, Any, Any, Any] = opcode.asInstanceOf[FlatMapOp[Any, Any, Any, Any]]
           opcode = io.io
           if (cont == null) {
@@ -63,7 +60,7 @@ object Runtime {
             })
           }
 
-        case Tag.FlatMapError =>
+        case IOTag.FlatMapError =>
           val io: FlatMapErrorOp[Any, Any, Any] = opcode.asInstanceOf[FlatMapErrorOp[Any, Any, Any]]
           opcode = io.io
           val _cont = cont
@@ -75,7 +72,7 @@ object Runtime {
               _cont
           })
 
-        case Tag.Attempt =>
+        case IOTag.Attempt =>
           val _cont = cont
           opcode = opcode.asInstanceOf[AttemptOp[Any, Any]].io
           cont = ResumeOp(() => {
