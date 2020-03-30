@@ -24,14 +24,17 @@ trait IO[+E, +A] { self =>
   def attempt: IO[Nothing, Either[E, A]] = {
     AttemptOp(self)
   }
+
+  def >>=[E1 >: E, B](f: => IO[E1, B]): IO[E, B] = {
+    flatMap(_ => f)
   }
 
 }
 
 object IO {
 
-  private[io] object Tag {
-    type Type = Int
+  def unit: IO[Nothing, Unit] = {
+    PureOp(())
   }
 
   def pure[A](a: A): IO[Nothing, A] = {

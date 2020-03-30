@@ -15,6 +15,8 @@ Roadmap:
   - [x] attempt
   - [x] flatMap
   - [x] ifM
+  - [x] unit
+  - [ ] *>, *<, <*>
   - [ ] foldM
 - [ ] Core FP typeclasses like:
   - [ ] Monoid
